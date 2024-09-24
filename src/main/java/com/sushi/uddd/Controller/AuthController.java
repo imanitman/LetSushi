@@ -93,7 +93,7 @@ public class AuthController {
     public ResponseEntity<String> sendOtp(@RequestBody String email){
         String serverOtp = this.securityUtil.generateOtp();
         this.emailService.sendVerificationEmail(email,"Your otp",serverOtp);
-        this.redisTemplate.opsForValue().set(email, serverOtp,Duration.ofMinutes(3));
+        this.redisTemplate.opsForValue().set(email, serverOtp, Duration.ofMinutes(3));
         return ResponseEntity.ok().body(serverOtp);
     }
     @PostMapping("/forget/check")
@@ -124,4 +124,5 @@ public class AuthController {
     public ResponseEntity<String> pageLogout(){
         return ResponseEntity.ok().body("success");
     }
+
 }

@@ -4,9 +4,12 @@ import com.sushi.uddd.Domain.Food;
 import com.sushi.uddd.Repository.FoodRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class FoodService {
     private final FoodRepository foodRepository;
+
     public FoodService (FoodRepository foodRepository){
         this.foodRepository = foodRepository;
     }
@@ -16,4 +19,7 @@ public class FoodService {
     public Food fetchFoodById(long id){
         return this.foodRepository.findById(id);
     }
+    public  fetchAllFood(){
+    }
+
 }
