@@ -1,8 +1,11 @@
 package com.sushi.uddd.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,4 +20,12 @@ public class Food {
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
     private String logo;
+
+    @OneToMany(mappedBy = "food")
+    @JsonIgnore
+    private List<Line> lines;
+
+    @ManyToOne
+    @JoinColumn(name = "stock_id")
+    private Stock stock;
 }

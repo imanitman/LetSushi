@@ -1,0 +1,103 @@
+package com.sushi.uddd.Service;
+
+import com.sushi.uddd.Domain.*;
+import com.sushi.uddd.Domain.Response.ResAddFood;
+import com.sushi.uddd.Domain.Response.ResCartDto;
+import com.sushi.uddd.Domain.Response.ResCheckQuantity;
+import com.sushi.uddd.Domain.Response.ResLineDto;
+import com.sushi.uddd.Repository.CartRepository;
+import com.sushi.uddd.Util.constant.StatusEnum;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class CartService {
+    private final CartRepository cartRepository;
+    private final UserService userService;
+    private final LineService lineService;
+    private final FoodService foodService;
+    private final StockService stockService;
+
+    public Cart saveCartInDB(Cart cart) {
+        return this.cartRepository.save(cart);
+    }
+    public Cart fetchCartById(long id) {
+        if (this.cartRepository.findById(id) == null) {
+            return null;
+        }
+        return this.cartRepository.findById(id);
+    }
+    public void deleteUnactiveCart(long id){
+        cartRepository.deleteById(id);
+    }
+    public ResCartDto fetchAllCurrentCart(int page, int size, long id) {
+        User user = this.userService.fetchUserById(id);
+        ResCartDto resCartDto = new ResCartDto();
+
+        // Fetch user's carts
+        List<Cart> carts = user.getCarts();
+        if (carts != null && !carts.isEmpty()) {
+            for (Cart cart : carts) {
+                // Check for active cart
+                if (cart.getStatus() == StatusEnum.ACTIVE) {
+                    resCartDto.setIdCart(cart.getId());
+
+                    // Fetch lines and calculate total price
+                    List<Line> lines = cart.getLines();
+                    List<ResLineDto> listLineDto = new ArrayList<>();
+                    long total_price = 0;
+
+                    if (lines != null && !lines.isEmpty()) {
+                        for (Line line : lines) {
+                            // Convert each Line to ResLineDto
+                            ResLineDto lineDto = this.lineService.convertToLineDto(line);
+                            listLineDto.add(lineDto);
+                            total_price += line.getPrice();
+                        }
+                    }
+
+                    // Set lines and total price in response DTO
+                    resCartDto.setListLine(listLineDto);
+                    resCartDto.setTotal_price(total_price);
+                    return resCartDto;  // Return as soon as active cart is found
+                }
+            }
+        }
+        // Return an empty DTO if no active cart was found
+        return resCartDto;
+    }
+    public ResCheckQuantity isEnoughFood(Cart cart){
+        ResCheckQuantity resCheckQuantity = new ResCheckQuantity();
+        if (cart != null){
+            List<Line> lines = cart.getLines();
+            if (lines != null){
+                for (Line line : lines){
+                    Food food = line.getFood();
+                    if (food.getStock().getQuantity() < line.getQuantity()){
+                        resCheckQuantity.setIsEnough(false);
+                        resCheckQuantity.setMessage("Sản phẩm " + food.getName() + "quá số lượng đặt hàng " + (line.getQuantity() - food.getStock().getQuantity()) +" đơn" );
+                        return resCheckQuantity;
+                    }
+                }
+                for (Line line : lines){
+                    Food  food = line.getFood();
+                    Stock currentStock =food.getStock();
+                    currentStock.setQuantity(food.getStock().getQuantity() - line.getQuantity());
+                    stockService.createStock(currentStock);
+                }
+                resCheckQuantity.setMessage("Thanh toán thành công");
+                resCheckQuantity.setIsEnough(true);
+                return resCheckQuantity;
+            }
+        }
+        return null;
+    }
+
+}

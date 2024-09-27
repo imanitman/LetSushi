@@ -27,4 +27,7 @@ public class UserService {
     public User fetchUserByEmail(String email){
         return this.userRepository.findByEmail(email);
     }
+    public User fetchUserById(long id){
+        return this.userRepository.findById(id).get();
+    }
 }

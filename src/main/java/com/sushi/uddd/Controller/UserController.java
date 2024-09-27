@@ -29,11 +29,14 @@ public class UserController {
         ResDetailUser resDetailUser = new ResDetailUser();
         if (email != null){
             User currentUser = this.userService.fetchUserByEmail(email);
-            resDetailUser.setName(currentUser.getName());
-            resDetailUser.setId(currentUser.getId());
-            resDetailUser.setPhoneNumber(currentUser.getPhoneNumber());
-            resDetailUser.setEmail(currentUser.getEmail());
-            return ResponseEntity.ok().body(resDetailUser);
+            if (currentUser != null){
+                resDetailUser.setName(currentUser.getName());
+                resDetailUser.setId(currentUser.getId());
+                resDetailUser.setPhoneNumber(currentUser.getPhoneNumber());
+                resDetailUser.setEmail(currentUser.getEmail());
+                return ResponseEntity.ok().body(resDetailUser);
+            }
+            return ResponseEntity.badRequest().body(resDetailUser);
         }
         return ResponseEntity.ok().body(resDetailUser);
     }
