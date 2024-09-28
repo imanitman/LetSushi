@@ -102,7 +102,6 @@ public class CartService {
     public Cart updateCartStatusInDb(Cart cart){
         Cart currentCart = this.cartRepository.findById(cart.getId());
         currentCart.setStatus(cart.getStatus());
-        this.saveCartInDB(currentCart);
         return currentCart;
     }
 

@@ -11,4 +11,5 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
     Food save(Food food);
     Food findById(long id);
     List<Food> findAll();
+    List<Food> findByNameContainingIgnoreCase(String name);
 }

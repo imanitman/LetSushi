@@ -2,6 +2,7 @@ package com.sushi.uddd.Service;
 
 import com.sushi.uddd.Domain.Food;
 import com.sushi.uddd.Domain.Response.ResFoodDto;
+import com.sushi.uddd.Domain.Response.ResSearchDto;
 import com.sushi.uddd.Repository.FoodRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,5 +50,19 @@ public class FoodService {
                 .map(this::convertToResFoodDto)
                 .toList();
         return resFoodDtoList;
+    }
+    public List<Food> findAllFood(){
+        return foodRepository.findAll();
+    }
+    public List<Food> searchFood(String name){
+        return foodRepository.findByNameContainingIgnoreCase(name);
+    }
+    public ResSearchDto resConvertFoodDto(Food food){
+        ResSearchDto resSearchDto = new ResSearchDto();
+        resSearchDto.setId(food.getId());
+        resSearchDto.setImageUrl(food.getLogo());
+        resSearchDto.setPrice(food.getPrice());
+        resSearchDto.setName(food.getName());
+        return resSearchDto;
     }
 }
